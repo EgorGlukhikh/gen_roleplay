@@ -1,0 +1,3 @@
+[html]
+<iframe src="https://egorglukhikh.github.io/gen_roleplay/" title="Тайная книга — генератор эпизодов" width="100%" height="950" style="display:block;border:0;background:#271b27;" allow="clipboard-write"></iframe>
+[/html]

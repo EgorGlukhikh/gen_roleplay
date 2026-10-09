@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тайная книга — генератор эпизодов</title>
+<style>
+.tk-book{--tk-cover:#3b2037;--tk-deep:#271724;--tk-paper:#d7cbb5;--tk-ink:#342330;--tk-gold:#c69a60;--tk-copper:#b56834;box-sizing:border-box;position:relative;max-width:1020px;margin:24px auto;color:var(--tk-ink);font:16px/1.6 Georgia,'Times New Roman',serif;color-scheme:light;text-align:left;isolation:isolate}
+.tk-book *,.tk-book *::before,.tk-book *::after{box-sizing:border-box}
+.tk-book [hidden]{display:none!important}
+.tk-book button,.tk-book input,.tk-book select{font:inherit}
+.tk-book button{cursor:pointer}
+.tk-book button:disabled{cursor:wait;opacity:.75}
+.tk-book button:focus-visible,.tk-book input:focus-visible,.tk-book select:focus-visible,.tk-book summary:focus-visible{outline:3px solid #84562d;outline-offset:4px}
+.tk-book .tk-volume{display:grid;grid-template-columns:minmax(0,.91fr) minmax(0,1.09fr);border:1px solid #805936;border-radius:7px 12px 12px 7px;background:var(--tk-cover);box-shadow:0 22px 55px #10090f55,4px 4px 0 #887963,7px 7px 0 #32222e;overflow:hidden}
+.tk-book .tk-cover{position:relative;display:flex;align-items:center;flex-direction:column;justify-content:center;min-width:0;padding:52px 40px 38px 53px;text-align:center;color:#e2c394;background:linear-gradient(90deg,#231421 0,#43243c 12px,#321b2d 21px,#43233b 27px,#3b2037 32px);border-right:1px solid #6d4b4f}
+.tk-book .tk-cover::before{content:'';position:absolute;inset:17px 19px 17px 38px;border:1px solid #a67c4866;pointer-events:none}
+.tk-book .tk-cover::after{content:'';position:absolute;inset:24px 26px 24px 45px;border:1px solid #a67c4829;pointer-events:none}
+.tk-book .tk-cover-mark{position:relative;width:104px;height:104px;flex:none;color:#c99e69;margin:0 0 27px}
+.tk-book .tk-cover-mark svg{display:block;width:100%;height:100%}
+.tk-book .tk-title{position:relative;margin:0;color:#e3c291;font:normal clamp(55px,6.8vw,78px)/.99 Georgia,'Times New Roman',serif;letter-spacing:-3px;text-shadow:0 2px 0 #1c101e}
+.tk-book .tk-cover-subtitle{position:relative;max-width:255px;margin:23px 0 0;font:italic 17px/1.65 Georgia,serif;color:#cbb5be}
+.tk-book .tk-cover-divider{width:83px;height:1px;background:#b78a5670;margin:28px auto 22px}
+.tk-book .tk-cover-note{max-width:240px;margin:0;color:#baa3b4;font:14px/1.7 Georgia,serif}
+.tk-book .tk-cover-bottom{margin:37px 0 0;color:#c99e69;font-size:13px;letter-spacing:4px}
+.tk-book .tk-page{position:relative;min-width:0;padding:40px 42px 29px;background:linear-gradient(90deg,#b6a58d 0,#c9bba2 9px,#d7cbb5 28px,#ded3be 100%)}
+.tk-book .tk-page-top{display:flex;align-items:center;gap:14px;margin-bottom:19px;color:#82654f;font:italic 13px/1.5 Georgia,serif}
+.tk-book .tk-page-top::after{content:'';height:1px;flex:1;background:#aa94717a}
+.tk-book .tk-form-title{margin:0 0 8px;font:normal 31px/1.2 Georgia,serif;letter-spacing:-.6px;color:#48263f}
+.tk-book .tk-intro{margin:0 0 25px;font:15px/1.65 Georgia,serif;color:#675248;max-width:360px}
+.tk-book .tk-field{display:block;margin:0 0 17px}
+.tk-book .tk-label{display:block;margin-bottom:6px;font:16px/1.35 Georgia,serif;color:#462d3d}
+.tk-book .tk-input,.tk-book .tk-select{display:block;width:100%;height:46px;min-width:0;margin:0;border:1px solid #ae9678;border-radius:4px;background:#eee5d4a8;box-shadow:inset 0 1px 3px #76543709;padding:10px 12px;color:#382837;font:15px/1.45 'Segoe UI',Arial,sans-serif;appearance:none;-webkit-appearance:none;transition:border-color .15s,background .15s}
+.tk-book .tk-input:hover,.tk-book .tk-select:hover{border-color:#896b55}
+.tk-book .tk-input:focus,.tk-book .tk-select:focus{background:#f2e9d8;border-color:#6b405c}
+.tk-book .tk-input::placeholder{color:#847363;opacity:1}
+.tk-book .tk-input[aria-invalid="true"]{border-color:#913c3d;background:#efdbcc}
+.tk-book .tk-help{display:block;margin-top:5px;color:#705b50;font:12px/1.5 'Segoe UI',Arial,sans-serif}
+.tk-book .tk-select-wrap{position:relative;display:block}
+.tk-book .tk-select-wrap::after{content:'';position:absolute;right:16px;top:17px;width:8px;height:8px;transform:rotate(45deg);border-right:1.5px solid #6b465d;border-bottom:1.5px solid #6b465d;pointer-events:none}
+.tk-book .tk-select{padding-right:36px}
+.tk-book .tk-options{display:grid;grid-template-columns:1fr;gap:0}
+.tk-book .tk-error{margin:0 0 14px;color:#823433;font:13px/1.5 'Segoe UI',Arial,sans-serif}
+.tk-book .tk-main-button{display:flex;align-items:center;justify-content:center;gap:13px;width:100%;min-height:51px;padding:13px 16px;margin:5px 0 0;border:1px solid #63354d;border-radius:4px;background:#4c2943;color:#f2ddba;box-shadow:inset 0 1px 0 #ffffff12;font:17px/1.4 Georgia,serif;transition:background .15s,transform .15s}
+.tk-book .tk-main-button:hover{background:#603750}
+.tk-book .tk-main-button:active{transform:translateY(1px)}
+.tk-book .tk-main-button>span[aria-hidden]{font-size:21px;line-height:1;color:#d2a268}
+.tk-book .tk-form-note{margin:12px auto 0;max-width:330px;text-align:center;font:italic 12px/1.65 Georgia,serif;color:#75604f}
+.tk-book .tk-reopen{display:block;margin:11px auto 0;padding:4px 8px;border:0;background:transparent;text-decoration:underline;text-underline-offset:3px;font:13px/1.5 Georgia,serif;color:#603b50}
+.tk-book .tk-page-number{margin:23px 0 0;text-align:center;font:13px/1 Georgia,serif;color:#8c755d}
+.tk-book .tk-under{margin:21px 0 0;text-align:center;color:#b4a1ab;font:12px/1.65 Georgia,serif}
+.tk-book .tk-noscript{padding:18px;background:#d7cbb5;color:#48263f}
+.tk-book .tk-modal{position:fixed!important;inset:0 auto auto 0!important;width:100vw;height:100vh;max-width:none!important;max-height:none!important;min-width:0!important;margin:0!important;padding:16px!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:auto!important;color:#382535;transform:none!important;box-sizing:border-box!important}
+.tk-book .tk-modal:not([open]){display:none!important}
+.tk-book .tk-modal[open]{display:flex!important;align-items:center;justify-content:center}
+.tk-book .tk-modal::backdrop{background:#150e18c9;backdrop-filter:blur(4px)}
+.tk-book .tk-close{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:36px;height:36px;margin:0;padding:0;border:1px solid #b59c7d;border-radius:50%;background:transparent;color:#653e55;font:24px/1 Arial,sans-serif}
+.tk-book .tk-close:hover{background:#e9ddc7}
+.tk-book .tk-copy{flex:none;width:100%;min-height:48px;padding:12px 14px;border:1px solid #60384f;border-radius:4px;background:#4c2943;color:#f2ddba;font:16px/1.4 Georgia,serif}
+.tk-book .tk-copy:hover{background:#603750}
+.tk-book .tk-copy-status{margin:12px 0 0;color:#51452f;font:13px/1.55 'Segoe UI',Arial,sans-serif;min-height:20px}
+.tk-book .tk-download{margin:12px 0 0;padding:7px 8px;background:transparent;border:0;color:#603b50;text-decoration:underline;text-underline-offset:3px;font:13px/1.5 'Segoe UI',Arial,sans-serif}
+.tk-book .tk-clipboard-buffer{position:fixed!important;left:0!important;top:0!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;margin:0!important;border:0!important}
+@media(max-width:750px){.tk-book{margin:14px 12px}.tk-book .tk-volume{grid-template-columns:1fr}.tk-book .tk-cover{padding:29px 32px 27px 42px;min-height:0}.tk-book .tk-cover::before{inset:11px 13px 11px 30px}.tk-book .tk-cover::after{inset:17px 19px 17px 36px}.tk-book .tk-cover-mark{width:44px;height:44px;margin:0 0 12px}.tk-book .tk-title{font-size:48px;line-height:1.07;letter-spacing:-2px}.tk-book .tk-title br{display:none}.tk-book .tk-cover-subtitle{max-width:none;margin:11px 0 0;font-size:14px}.tk-book .tk-cover-divider,.tk-book .tk-cover-note,.tk-book .tk-cover-bottom{display:none}.tk-book .tk-page{padding:27px 28px 23px}.tk-book .tk-page-top{margin-bottom:13px}.tk-book .tk-form-title{font-size:29px}.tk-book .tk-intro{max-width:100%;margin-bottom:22px}.tk-book .tk-page-number{margin-top:18px}.tk-book .tk-under{margin-top:17px;padding:0 12px}}
+@media(max-width:390px){.tk-book .tk-title{font-size:41px}.tk-book .tk-page{padding:25px 21px 20px}.tk-book .tk-cover-subtitle{font-size:13px}.tk-book .tk-sealed{padding:31px 21px 22px}.tk-book .tk-sealed-title{font-size:28px}}
+.tk-book .tk-story-window{position:relative;display:flex;flex-direction:column;width:100%;max-width:740px;max-height:100%;min-height:0;background:#d7cbb5;border:1px solid #c69a60;border-radius:7px;box-shadow:0 14px 45px #08030b4d;overflow:hidden}
+.tk-book .tk-preview-heading{flex:none;margin:0;padding:20px 60px 17px 24px;color:#674d58;font:italic 18px/1.4 Georgia,serif}
+.tk-book .tk-preview{min-height:0;overflow:auto;padding:0 18px;overscroll-behavior:contain;scrollbar-color:#96775f #d7cbb5}
+.tk-book .tk-preview>div{margin:0 auto!important}
+.tk-book .tk-story-footer{flex:none;padding:16px 20px 12px;border-top:1px solid #b9a389;background:#d7cbb5}
+.tk-book .tk-story-actions{display:flex;gap:12px;align-items:stretch}
+.tk-book .tk-regenerate{flex:1;min-width:0;padding:10px 14px;border:1px solid #9a7d65;border-radius:4px;background:transparent;color:#4c2943;font:16px/1.4 Georgia,serif}
+.tk-book .tk-regenerate:hover{background:#e7dcc7}
+.tk-book .tk-story-actions .tk-copy{flex:1.6;width:auto;min-width:0}
+.tk-book .tk-copy-status:empty{display:none}
+.tk-book .tk-copy-status{margin-top:9px;text-align:center}
+.tk-book .tk-story-footer .tk-download{display:block;margin:8px auto 0}
+.tk-book .tk-preview:focus-visible{outline:2px solid #84562d;outline-offset:-3px}
+@media(max-width:450px){.tk-book .tk-modal{padding:8px!important}.tk-book .tk-preview{padding:0 6px}.tk-book .tk-preview-heading{padding:16px 54px 14px 15px;font-size:16px}.tk-book .tk-story-footer{padding:10px}.tk-book .tk-story-actions{flex-direction:column;gap:8px}.tk-book .tk-story-actions .tk-copy{order:-1;font-size:15px;min-height:44px}.tk-book .tk-regenerate{font-size:15px;padding:8px}.tk-book .tk-copy-status{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.tk-book *{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body style="margin:0;padding:1px 0 22px;background:#271b27;">
+<article class="tk-book" data-tk-book>
+  <div class="tk-volume">
+    <header class="tk-cover">
+      <div class="tk-cover-mark" aria-hidden="true">
+        <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="55" cy="55" r="49" stroke="currentColor" stroke-width=".65"/><circle cx="55" cy="55" r="42" stroke="currentColor" stroke-width=".6" stroke-dasharray="1 6"/><path d="M66 24c-20 2-31 22-23 40 5 11 17 17 29 15-8 9-26 9-37-1-15-14-14-35 1-47 8-7 20-9 30-7Z" stroke="currentColor" stroke-width="1.2"/><path d="m73 36 2.5 8L83 47l-7.5 3-2.5 8-3-8-7-3 7-3 3-8Z" fill="currentColor"/><path d="M51 9v10M51 91v10M9 55h10M91 55h10" stroke="currentColor" stroke-width=".7"/><circle cx="81" cy="68" r="1.6" fill="currentColor"/></svg>
+      </div>
+      <h1 class="tk-title">Тайная<br> книга</h1>
+      <p class="tk-cover-subtitle">Собрание маленьких случайностей<br>и ещё не рассказанных историй</p>
+      <div class="tk-cover-divider" aria-hidden="true"></div>
+      <p class="tk-cover-note">Одно знакомое имя.<br>Одна неожиданная встреча.<br>Всё остальное — между строк.</p>
+      <p class="tk-cover-bottom" aria-hidden="true">✦ &nbsp; ☾ &nbsp; ✦</p>
+    </header>
+    <section class="tk-page" aria-label="Генератор эпизодов">
+      <div class="tk-page-top">Глава, которой ещё нет</div>
+      <h2 class="tk-form-title">Кто войдёт в историю?</h2>
+      <p class="tk-intro">Впиши два имени и доверь книге начало.<br>Продолжение вы придумаете сами.</p>
+      <form class="tk-form" novalidate>
+        <label class="tk-field"><span class="tk-label">Твой ник</span><input class="tk-input" name="self" type="text" placeholder="James Potter" maxlength="64" autocomplete="off" autocapitalize="words" spellcheck="false" required><span class="tk-help" data-self-help>Точно как на форуме, английскими буквами.</span></label>
+        <label class="tk-field"><span class="tk-label">Ник соигрока</span><input class="tk-input" name="partners" type="text" placeholder="Sirius Black" maxlength="512" autocomplete="off" autocapitalize="words" spellcheck="false" required><span class="tk-help" data-partners-help>Если вас больше двух, добавь ники через запятую.</span></label>
+        <div class="tk-options">
+          <label class="tk-field"><span class="tk-label">Кем вы приходитесь друг другу?</span><span class="tk-select-wrap"><select class="tk-select" name="relation"><option value="friends">Друзья</option></select></span></label>
+          <label class="tk-field"><span class="tk-label">Какая глава вашей жизни?</span><span class="tk-select-wrap"><select class="tk-select" name="realm"><option value="world">Взрослая жизнь · 30+</option><option value="school">Хогвартс · школьные годы</option></select></span></label>
+        </div>
+        <label class="tk-field"><span class="tk-label">О чём будет история?</span><span class="tk-select-wrap"><select class="tk-select" name="sphere"><option value="auto">На усмотрение книги</option></select></span></label>
+        <p class="tk-error" role="alert" hidden></p>
+        <button class="tk-main-button" type="submit" disabled><span aria-hidden="true">☾</span>Довериться книге</button>
+        <p class="tk-form-note">Прочитай завязку, смени идею или забери<br>готовую страницу на форум.</p>
+        <button class="tk-reopen" type="button" hidden>Вернуться к выбранной странице</button>
+      </form>
+      <p class="tk-page-number" aria-hidden="true">— &nbsp; 1 &nbsp; —</p>
+    </section>
+  </div>
+  <p class="tk-under">Истории волшебного мира · Эпоха Мародеров</p>
+  <noscript><p class="tk-noscript">Для генератора нужен JavaScript. Открой HTML-файл в браузере или проверь, разрешены ли скрипты в HTML-блоках форума.</p></noscript>
+  <dialog class="tk-modal">
+    <div class="tk-story-window">
+      <button class="tk-close" type="button" aria-label="Закрыть окно">×</button>
+      <h2 class="tk-preview-heading" tabindex="-1">Ваша следующая история</h2>
+      <div class="tk-preview" tabindex="0" role="region" aria-label="Превью эпизода"></div>
+      <div class="tk-story-footer">
+        <div class="tk-story-actions">
+          <button class="tk-regenerate" type="button">Сменить идею</button>
+          <button class="tk-copy" type="button">Копировать текст эпизода</button>
+        </div>
+        <p class="tk-copy-status" role="status" aria-live="polite"></p>
+        <button class="tk-download" type="button" hidden>Скачать текст эпизода</button>
+      </div>
+    </div>
+  </dialog>
+</article>
+<script>
+(async () => {
+'use strict';
+const root = document.querySelector('[data-tk-book]:not([data-tk-ready])');
+if (!root) return;
+root.setAttribute('data-tk-ready','1');
+try {
+const bytes = Uint8Array.from(atob('@@LIBRARY@@'), c => c.charCodeAt(0));
+const library = JSON.parse(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text());
+const stories = library.stories;
+@@ENGINE@@
+@@UI@@
+} catch (failure) {
+  const error = root.querySelector('.tk-error');
+  error.hidden = false;
+  error.textContent = 'Книга не смогла открыться. Попробуй обновить страницу в современном браузере.';
+}
+})();
+</script>
+</body>
+</html>
