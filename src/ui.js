@@ -25,13 +25,19 @@ for (const name of ['self','partners']) {
   form.elements[name].setAttribute('aria-labelledby', label.id);
   form.elements[name].setAttribute('aria-describedby', help.id);
 }
-form.elements.relation.replaceChildren(...engine.relations.map(relation => {
+function updateRelations(){
+const selected=form.elements.relation.value||'friends';
+const available=engine.availableRelations(form.elements.realm.value);
+form.elements.relation.replaceChildren(...available.map(relation => {
   const option = document.createElement('option');
   option.value = relation.value;
   option.textContent = relation.label;
-  option.selected = relation.value === 'friends';
+  option.selected = relation.value === selected;
   return option;
 }));
+form.elements.relation.value=available.some(r=>r.value===selected)?selected:'friends';
+}
+updateRelations();
 let currentPayload = '';
 let currentSettings = null;
 let lastFocus = null;
@@ -49,7 +55,7 @@ function updateSpheres() {
   }));
   form.elements.sphere.value = available.includes(selected) ? selected : 'auto';
 }
-form.elements.realm.addEventListener('change',updateSpheres);
+form.elements.realm.addEventListener('change',()=>{updateRelations();updateSpheres();});
 form.elements.relation.addEventListener('change',updateSpheres);
 updateSpheres();
 find('.tk-main-button').disabled = false;

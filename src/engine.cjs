@@ -4,7 +4,10 @@ function createBookEngine(stories, components) {
     {value:'strangers',label:'Незнакомцы'}, {value:'acquaintances',label:'Знакомые'},
     {value:'friends',label:'Друзья'}, {value:'bestfriends',label:'Лучшие друзья'},
     {value:'rivals',label:'Соперники'}, {value:'enemies',label:'Враги'},
-    {value:'couple',label:'Романтическая пара'}, {value:'family',label:'Родственники'},
+    {value:'couple',label:'Романтическая пара'}, {value:'lovers',label:'Любовники · страсть и близость',adult:true},
+    {value:'spouses',label:'Супруги',adult:true}, {value:'exes',label:'Бывшие партнёры',adult:true},
+    {value:'family',label:'Родственники'}, {value:'siblings',label:'Братья / сёстры'},
+    {value:'parentchild',label:'Родитель → взрослый ребёнок',adult:true},
     {value:'colleagues',label:'Коллеги'}, {value:'partners',label:'Напарники'}
   ];
   const mechanisms = components.mechanisms.map(([value,label])=>({value,label}));
@@ -34,11 +37,13 @@ function createBookEngine(stories, components) {
     if (names.length < 2) fail('Для истории нужны двое: укажи ник, отличный от своего.', 'partners');
     return names;
   }
-  const hasRelation = (story, relation) => story.relation === '*' || story.relation === relation || Array.isArray(story.relation) && story.relation.includes(relation);
+  const hasRelation = (story, relation) => story.relation === relation || Array.isArray(story.relation) && story.relation.includes(relation);
+  const availableRelations = realm => relations.filter(r=>realm!=='school'||!r.adult);
   function pairKey(names) {
     return JSON.stringify([...new Set(names.map(name=>name.trim().replace(/^@+\s*/,'').replace(/[ \t]+/g,' ').toLowerCase()))].sort());
   }
   function eligible({realm,relation,sphere='auto'}) {
+    if(!availableRelations(realm).some(r=>r.value===relation))return [];
     return stories.filter(s=>s.realm===realm && hasRelation(s,relation) && (sphere==='auto' || sphere==='ordinary' ? sphere==='auto' || s.normal : s.sphere===sphere));
   }
   function availableSpheres({realm,relation}) {
@@ -122,8 +127,8 @@ function createBookEngine(stories, components) {
       if(!complications.length)throw new Error('Для этой истории не найдено подходящее продолжение.');
       const complicationIds=olderOptions(complications.map(c=>c.id),'complication',history);
       const complication=pick(complications.filter(c=>complicationIds.includes(c.id)));
-      const [a,b]=random()<.5?names:[names[1],names[0]];
-      const connection=story.relation==='*'?pick(components.relationIntros[relation]):'';
+      const [a,b]=relation==='parentchild'||random()<.5?names:[names[1],names[0]];
+      const connection='';
       const result={story,names:names.slice(),a,b,realm,relation,sphere:selectedSphere,mechanism,tone,scale:story.scale,complication,connection,cooldownApplied:cooldown};
       pairs.delete(key);
       pairs.set(key,[...history,{id:story.id,mechanism,tone,scale:story.scale,complication:complication.id,variant}].slice(-60));
@@ -149,7 +154,7 @@ function createBookEngine(stories, components) {
       '<div style="box-sizing:border-box;max-width:760px;margin:16px auto;padding:8px;background:#3b2037;border:1px solid #866044;border-radius:7px;color-scheme:light;">' +
       '<div style="box-sizing:border-box;background:#d7cbb5;border:1px solid #b59c79;padding:clamp(22px,5vw,42px);border-radius:3px;">' +
       '<p style="margin:0 0 22px;text-align:center;font:italic 16px/1.6 Georgia,serif;color:#674d58;">Тайная книга предлагает тебе погрузиться в историю…</p>' +
-      '<div aria-hidden="true" style="text-align:center;color:#956d3e;font-size:18px;margin-bottom:12px;">☾ &nbsp; ✦ &nbsp; ☽</div>' +
+      '<div aria-hidden="true" style="text-align:center;margin:0 0 14px;height:88px;"><img alt="" src="https://egorglukhikh.github.io/gen_roleplay/assets/relations/'+escape(result.relation)+'.png" style="display:block;width:144px;height:88px;object-fit:contain;margin:0 auto;" /></div>' +
       '<h2 style="margin:0 0 18px;text-align:center;font:normal clamp(25px,5vw,34px)/1.2 Georgia,serif;color:#48263f;overflow-wrap:anywhere;">' + escape(story.title) + '</h2>' +
       '<p style="margin:0 0 24px;text-align:center;font:14px/1.7 Georgia,serif;overflow-wrap:anywhere;">' + names.map(mention).join(' &nbsp;·&nbsp; ') + '</p>' +
       '<p style="margin:0 0 14px;font:italic 14px/1.5 Georgia,serif;color:#725346;">' + escape(story.place || relationLabel+' · '+sphereLabel) + '</p>' + connection +
@@ -159,6 +164,6 @@ function createBookEngine(stories, components) {
       '</div></div>';
   }
   function render(result){return '['+'html]\n'+renderCard(result)+'\n['+'/html]';}
-  return {relations,mechanisms,spheres,tones,parseNames,pairKey,availableSpheres,compatibleComplications,createSession,renderCard,render};
+  return {relations,availableRelations,mechanisms,spheres,tones,parseNames,pairKey,availableSpheres,compatibleComplications,createSession,renderCard,render};
 }
 if (typeof module !== 'undefined' && module.exports) module.exports = createBookEngine;

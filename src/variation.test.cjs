@@ -15,8 +15,8 @@ test('specific formats change the premise and survive history reload without imm
   const titles=new Set();let previous;let seed=71;
   const random=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
   for(let i=0;i<18;i++){
-   const r=e.createSession({random,storage}).generate({names:['Arthur Weasley','Molly Weasley'],realm:base.realm,relation:base.relation==='*'?'family':base.relation,sphere:base.sphere});
-   assert.notEqual(r.story.title,previous);previous=r.story.title;titles.add(previous);
+   const r=e.createSession({random,storage}).generate({names:['Arthur Weasley','Molly Weasley'],realm:base.realm,relation:Array.isArray(base.relation)?base.relation[0]:base.relation,sphere:base.sphere});
+   assert.notEqual(r.story.scene,previous);previous=r.story.scene;titles.add(previous);
    assert.ok(e.render(r).includes(r.story.title));
   }
   assert.equal(titles.size,3);

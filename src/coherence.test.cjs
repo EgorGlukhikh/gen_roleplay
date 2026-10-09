@@ -14,7 +14,7 @@ test('duel tournament never imports unrelated leisure incidents',()=>{
  assert.equal(endings.size,3);
 });
 test('every complete scene and explicit variant renders only its reviewed continuations',()=>{
- assert.equal(stories.length,356);
+ assert.equal(stories.length,536);
  for(const base of stories)for(const s of base.variants?base.variants.map(v=>({...base,...v})):[base]){
   for(const complication of engine.compatibleComplications(s)){
    const r={story:s,names:['Arthur Weasley','Molly Weasley'],a:'Arthur Weasley',b:'Molly Weasley',relation:'family',sphere:s.sphere,complication};
