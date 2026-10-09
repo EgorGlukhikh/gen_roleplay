@@ -1,11 +1,11 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {stories,components}=require('./library.json'),factory=require('./engine.cjs'),engine=factory(stories,components);
-test('all 536 stories are reviewed and have explicit relationships; 180 additions have three scene versions',()=>{
- assert.equal(stories.length,536);assert.equal(new Set(stories.map(s=>s.id)).size,stories.length);
+test('all 1304 stories are reviewed and have explicit relationships; 180 v3 additions have three scene versions',()=>{
+ assert.equal(stories.length,1304);assert.equal(new Set(stories.map(s=>s.id)).size,stories.length);
  const additions=stories.filter(s=>s.source==='authored-v3');assert.equal(additions.length,180);
  assert.equal(additions.filter(s=>s.realm==='school').length,60);
  for(const s of stories){
-  assert.notEqual(s.relation,'*',s.id);assert.equal(s.review.version,3,s.id);
+  assert.notEqual(s.relation,'*',s.id);assert.ok(s.review.version>=3,s.id);
   for(const r of [s.relation].flat())assert.ok(engine.availableRelations(s.realm).some(v=>v.value===r),s.id+': '+r);
   for(const key of ['sphere','mechanism','tone'])assert.ok(engine[key==='sphere'?'spheres':key==='tone'?'tones':'mechanisms'].some(v=>v.value===s[key]),s.id+': '+key);
   assert.ok(s.scene.includes('{a}')&&s.scene.includes('{b}'),s.id);

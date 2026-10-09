@@ -92,10 +92,16 @@ function createBookEngine(stories, components) {
     function generate({names,realm,relation,sphere='auto'}) {
       if(!['school','world'].includes(realm)||!relations.some(r=>r.value===relation)||!['auto','ordinary',...spheres.map(s=>s.value)].includes(sphere))throw new Error('Выбери главу, отношения и сферу из списка.');
       if(!Array.isArray(names)||names.length<2||names.some(n=>typeof n!=='string'))throw new Error('Для истории нужны двое.');
-      const pool=eligible({realm,relation,sphere});
-      if(!pool.length)throw new Error('Для этой главы выбери другую сферу истории.');
+      const eligiblePool=eligible({realm,relation,sphere});
+      if(!eligiblePool.length)throw new Error('Для этой главы выбери другую сферу истории.');
       load();
       const key=pairKey(names),history=pairs.get(key)||[];
+      // Unseen premises take priority over mechanism rotation. Otherwise a rare
+      // mechanism can repeatedly bring back its only story despite unused choices.
+      const recentIds=history.slice(-30).map(e=>e.id);
+      const unseen=eligiblePool.filter(s=>!recentIds.includes(s.id));
+      const oldestIds=unseen.length?[]:olderOptions(eligiblePool.map(s=>s.id),'id',history);
+      const pool=unseen.length?unseen:eligiblePool.filter(s=>oldestIds.includes(s.id));
       let cooldown=5,mechanismPool=[];
       for(;cooldown>=0;cooldown--) {
         const recent=cooldown?history.slice(-cooldown).map(e=>e.mechanism):[];
@@ -104,7 +110,6 @@ function createBookEngine(stories, components) {
       }
       const mechanism=pick([...new Set(mechanismPool.map(s=>s.mechanism))]);
       let candidates=mechanismPool.filter(s=>s.mechanism===mechanism);
-      const recentIds=history.slice(-30).map(e=>e.id);
       const fresh=candidates.filter(s=>!recentIds.includes(s.id));
       if(fresh.length)candidates=fresh;
       else {const ids=olderOptions(candidates.map(s=>s.id),'id',history);candidates=candidates.filter(s=>ids.includes(s.id));}
